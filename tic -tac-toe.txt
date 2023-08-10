@@ -1,0 +1,115 @@
+import math
+# The Tic-Tac-Toe board
+board = ['-'] * 9
+
+# Define players
+HUMAN = 'X'
+AI = 'O'
+
+# Function to print the current board
+def print_board():
+    for i in range(0, 9, 3):
+        print(board[i], board[i + 1], board[i + 2])
+
+# Function to check if a player has won
+def check_winner(player):
+    winning_combinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
+        [0, 4, 8], [2, 4, 6]            # Diagonals
+    ]
+    for combo in winning_combinations:
+        if all(board[i] == player for i in combo):
+            return True
+    return False
+
+# Function to check if the board is full
+def is_board_full():
+    return all(cell != '-' for cell in board)
+
+# Minimax algorithm with Alpha-Beta Pruning
+def minimax(depth, maximizing_player, alpha, beta):
+    if check_winner(AI):
+        return 1
+    if check_winner(HUMAN):
+        return -1
+    if is_board_full():
+        return 0
+    
+    if maximizing_player:
+        max_eval = -math.inf
+        for i in range(9):
+            if board[i] == '-':
+                board[i] = AI
+                eval = minimax(depth + 1, False, alpha, beta)
+                board[i] = '-'
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+        return max_eval
+    else:
+        min_eval = math.inf
+        for i in range(9):
+            if board[i] == '-':
+                board[i] = HUMAN
+                eval = minimax(depth + 1, True, alpha, beta)
+                board[i] = '-'
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+        return min_eval
+
+# AI's move using Minimax with Alpha-Beta Pruning
+def ai_move():
+    best_move = -1
+    best_eval = -math.inf
+    alpha = -math.inf
+    beta = math.inf
+    
+    for i in range(9):
+        if board[i] == '-':
+            board[i] = AI
+            eval = minimax(0, False, alpha, beta)
+            board[i] = '-'
+            
+            if eval > best_eval:
+                best_eval = eval
+                best_move = i
+    
+    board[best_move] = AI
+
+# Main game loop
+def play_game():
+    print("Welcome to Tic-Tac-Toe!")
+    print_board()
+    
+    while True:
+        move = int(input("Enter your move (0-8): "))
+        if board[move] != '-':
+            print("Invalid move. Try again.")
+            continue
+        
+        board[move] = HUMAN
+        print_board()
+        
+        if check_winner(HUMAN):
+            print("You win!")
+            break
+        elif is_board_full():
+            print("It's a draw!")
+            break
+        
+        ai_move()
+        print("AI's move:")
+        print_board()
+        
+        if check_winner(AI):
+            print("AI wins!")
+            break
+        elif is_board_full():
+            print("It's a draw!")
+            break
+
+play_game()
